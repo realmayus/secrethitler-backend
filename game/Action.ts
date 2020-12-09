@@ -1,4 +1,5 @@
 import { ActionStatus } from "./ActionStatus";
+import Player from "./Player";
 
 export default class Action {
     name = "";
@@ -8,7 +9,7 @@ export default class Action {
         throw new Error("Not implemented")
     }
 
-    handleActionSpecs(): void {
+    handleActionSpecs(submittedBy: Player, actionSpecs: Record<string, any>): void {
         throw new Error("Not implemented");
     }
 }

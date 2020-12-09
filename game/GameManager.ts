@@ -1,4 +1,6 @@
-import Game from "./Game.ts";
+import Game from "./Game";
+import Player from "./Player";
+import GameError from "./GameError";
 
 export default class GameManager {
 
@@ -8,18 +10,23 @@ export default class GameManager {
 		return this.games.find((x) => x.id === id)
 	}
 
-	createGame(name: string, minPlayers: number, maxPlayers: number): void {
+	createGame(name: string, minPlayers: number, maxPlayers: number): Game {
 		const new_game = new Game(name, minPlayers, maxPlayers);
 		this.games.push(new_game);
+		return new_game
 	}
 
-	killGame(game: Game) {
-		game.end();
-	}
-	forwardAction(game: Game, actionType: string, actionSpecs: Record<string, any>) {
-		if (game.currentAction.name !== actionType) {
-			throw new Error("Given action does not match current action in the game")
+	// killGame(game: Game) {
+	// 	game.end();
+	// }
+
+	forwardAction(game: Game, submittedBy: Player, actionType: string, actionSpecs: Record<string, any>): void {
+		if(!game.players.includes(submittedBy)) {
+			throw new GameError("You're not a part of the game")
 		}
-		game.currentAction.handleActionSpecs(actionSpecs);
+		if (game.currentAction.name !== actionType) {
+			throw new GameError("Given action does not match current action in the game")
+		}
+		game.currentAction.handleActionSpecs(submittedBy, actionSpecs);
 	}
 }

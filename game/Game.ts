@@ -32,13 +32,23 @@ class Game {
     president: Player;
     chancellor: Player;
     chancellorNominee: Player | undefined = undefined;
-    gameTracker = 0;
+    electionTracker = 0;
     ineligiblePlayers: Player[] = [];
     currentAction: Action;
+    spectators: Player[] = [];
 
     join(player: Player) {
         this.players.push(player);
         console.log(`Player ${player.name} joined game ${this.name}.`)
+
+        if (this.players.length >= this.minPlayers) {
+            this.startGame();
+        }
+    }
+
+    joinAsSpectator(player: Player) {
+        this.spectators.push(player);
+        console.log(`Spectator ${player.name} joined game ${this.name}.`)
     }
 
     startGame() {
@@ -54,12 +64,8 @@ class Game {
         this.president = this.players[Math.floor(Math.random() * this.players.length)]  // Nominate random player as president
         this.players.map((player) => this.broadcastToPlayer(player, this.serializeGameInfo(player)));
 
-
-        this.currentAction = new Nomination(this, this.president)
-
-        while (this.libPolicies < 5 && !this.deadPlayers.includes(this.hitler) && this.fasPolicies < 6 && ((this.chancellor !== this.hitler || this.chancellor == null) && this.fasPolicies < 3)) {
-        }
-        console.log(`Game ${this.name} has ended.`)
+        console.log("Nomination has started")
+        this.currentAction = new Nomination(this)
     }
 
 
@@ -85,17 +91,17 @@ class Game {
         return JSON.stringify({
             name: this.name,
             maxPlayers: this.maxPlayers,
-            players: this.players.map((p) => p.userID),
+            players: this.players,
             deadPlayers: this.deadPlayers.map((p) => p.userID),
-            fascists: this.fascists.includes(player) ? this.fascists : undefined,
-            liberals: this.fascists.includes(player) ? this.liberals : undefined,
+            fascists: this.fascists.includes(player) ? this.fascists.map((p) => p.userID) : undefined,
+            liberals: this.fascists.includes(player) ? this.liberals.map((p) => p.userID) : undefined,
             hitler: this.fascists.includes(player) ? this.hitler : undefined,
             libPolicies: this.libPolicies,
             fasPolicies: this.fasPolicies,
-            president: this.president,
-            chancellor: this.chancellor,
-            gameTracker: this.gameTracker,
-            ineligiblePlayers: this.ineligiblePlayers,
+            president: this.president != null ? this.president.userID : undefined,
+            chancellor: this.chancellor != null ? this.chancellor.userID : undefined,
+            gameTracker: this.electionTracker,
+            ineligiblePlayers: this.ineligiblePlayers.map((p) => p.userID),
             currentAction: this.currentAction
         });
 
