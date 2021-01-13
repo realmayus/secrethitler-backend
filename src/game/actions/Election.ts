@@ -1,8 +1,9 @@
 import Action from "../Action";
 import Game from "../Game";
 import Player from "../Player";
-import { ActionStatus } from "../ActionStatus";
-import Legislative from "./Legislative.ts";
+import Legislative from "./Legislative";
+
+import { ActionStatus } from "../Enums";
 
 export default class Election extends Action {
     name = "election"
@@ -16,12 +17,13 @@ export default class Election extends Action {
         super();
         this.game = game;
 
-        this.game.players.map(p => this.game.broadcastToPlayer(p, {type: "action", actionType: "election", status: ActionStatus.start, actionSpecs: {nominee: this.game.chancellorNominee.userID}}));
+        this.game.players.map((p: any) => this.game.broadcastToPlayer(p, {type: "action", actionType: "election", status: ActionStatus.start, actionSpecs: {nominee: this.game.chancellorNominee.userID}}));
+        console.log("Election begins!");
     }
 
 
     handleActionSpecs(submittedBy: Player, actionSpecs: Record<string, any>): void {
-        console.log("Received action from player " + submittedBy.name, actionSpecs)
+        console.log("Received action from player " + submittedBy.username, actionSpecs)
 
         if (this.votesJa.includes(submittedBy)) { // change vote
             if(actionSpecs.vote === "nein") {
@@ -51,11 +53,9 @@ export default class Election extends Action {
             let didWin: boolean;
             if(this.votesJa.length <= this.votesNein.length) {
                 this.game.electionTracker += 1;
-                this.game.chancellorNominee = undefined;
                 didWin = false;
             } else {
                 this.game.chancellor = this.game.chancellorNominee;
-                this.game.chancellorNominee = undefined;
                 didWin = true;
                 //TODO check if hitler & >=3 facist policies
             }
@@ -66,7 +66,8 @@ export default class Election extends Action {
                         votesJa: this.votesJa.map(v => v.userID),
                         votesNein: this.votesNein.map(v => v.userID),
                     }}));
-            this.game.currentAction = new Legislative()
+            this.game.chancellorNominee = undefined;
+            this.game.currentAction = new Legislative(this.game)
         }
     }
 }

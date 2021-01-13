@@ -1,9 +1,9 @@
 import Action from "../Action";
-import Game from "../Game.ts";
-import { PolicyType } from "../PolicyType.ts";
-import { ActionStatus } from "../ActionStatus.ts";
-import Player from "../Player.ts";
-import GameError from "../GameError.ts";
+import Game from "../Game";
+import { ActionStatus, GameEndReason, GameStatus, PolicyType } from "../Enums";
+import Player from "../Player";
+import GameError from "../GameError";
+import Nomination from "./Nomination";
 
 export default class Legislative extends Action {
     name = "legislative"
@@ -18,7 +18,7 @@ export default class Legislative extends Action {
 
         this.game.players.map(p => p !== this.game.president && this.game.broadcastToPlayer(p, {
             type: "action",
-            actionType: "election",
+            actionType: "legislative",
             status: ActionStatus.start,
             actionSpecs: { who: "president" }
         }));
@@ -79,6 +79,17 @@ export default class Legislative extends Action {
                 type: "action", actionType: "legislative", status: ActionStatus.end,
                 actionSpecs:{ policy: this.policies[0] }
             }));
+
+            this.game.players.map(p => this.game.broadcastToPlayer(p, this.game.serializeGameInfo(p)));
+            if(this.game.fasPolicies !== 6 || this.game.libPolicies !== 5) {
+                this.game.currentAction = new Nomination(this.game);
+            } else if (this.game.fasPolicies === 6) {
+                this.game.players.map((p: Player) => this.game.broadcastToPlayer(p, {
+                    type: "gameStatus", status: GameStatus.end, reason: GameEndReason.fasPoliciesCompleted}));
+            } else if (this.game.libPolicies === 5) {
+                this.game.players.map((p: Player) => this.game.broadcastToPlayer(p, {
+                    type: "gameStatus", status: GameStatus.end, reason: GameEndReason.libPoliciesCompleted}));
+            }
         }
 
 

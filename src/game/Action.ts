@@ -1,13 +1,10 @@
-import { ActionStatus } from "./ActionStatus";
 import Player from "./Player";
+import Game from "./Game";
 
 export default class Action {
     name = "";
-    status: ActionStatus;
+    game: Game | undefined;
 
-    start(): Promise< Record<string, unknown> | undefined > {
-        throw new Error("Not implemented")
-    }
 
     handleActionSpecs(submittedBy: Player, actionSpecs: Record<string, any>): void {
         throw new Error("Not implemented");
